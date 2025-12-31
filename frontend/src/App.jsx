@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { supabase } from './lib/supabaseClient';
 import Login from './pages/Login';
+import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Accounts from './pages/Accounts';
 import Analytics from './pages/Analytics';
@@ -9,11 +11,39 @@ import { MainLayout } from './components/Layout';
 import ChatbotWidget from './components/ChatbotWidget';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
+  useEffect(() => {
+    // Check active session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  const isLoggedIn = !!session;
 
   return (
     <div className="antialiased text-slate-900">
@@ -24,7 +54,17 @@ function App() {
             isLoggedIn ? (
               <Navigate to="/" replace />
             ) : (
-              <Login onLogin={() => setIsLoggedIn(true)} />
+              <Login />
+            )
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            isLoggedIn ? (
+              <Navigate to="/" replace />
+            ) : (
+              <Signup />
             )
           }
         />
@@ -44,7 +84,7 @@ function App() {
           <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
-      <ChatbotWidget />
+      {isLoggedIn && <ChatbotWidget />}
     </div>
   );
 }
