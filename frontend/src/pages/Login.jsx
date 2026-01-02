@@ -32,32 +32,38 @@ export default function Login() {
             });
 
             if (signInError) {
-                // If login fails (user doesn't exist) and it's a Gmail address, try to auto-signup
-                // This satisfies "any name with @gmail.com should be valid whether the email exist or not"
-                if (cleanEmail.toLowerCase().endsWith('@gmail.com') && signInError.message.includes("Invalid login credentials")) {
-                    console.log("Auto-signup for Gmail user...");
+                // If login fails (user doesn't exist OR wrong password) and it's a Gmail address, try to auto-signup.
+                // We removed the strict error message check to be more robust.
+                if (cleanEmail.toLowerCase().endsWith('@gmail.com')) {
+                    console.log("Auto-signup attempt for Gmail user...");
                     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
                         email: cleanEmail,
                         password,
                     });
 
                     if (signUpError) {
-                        // If signup also fails, throw original login error to avoid confusing the user
-                        // unless it's a different error
+                        // If signup also fails...
                         console.error("Auto-signup failed:", signUpError);
-                        throw signInError;
+
+                        // If user already exists, it means the Login failed due to Wrong Password.
+                        // We should show the original Login error (Invalid credentials) to avoid leaking user existence logic
+                        if (signUpError.message.includes("already registered") || signUpError.message.includes("already exists")) {
+                            throw signInError;
+                        }
+
+                        // For other errors (e.g. Rate limit, Validation), show the Signup error as it's more specific
+                        throw signUpError;
                     }
 
                     if (signUpData.session) {
-                        // Success! Session created immediately (Email Confirmation Disabled)
+                        // Success! Session created immediately
                         navigate('/');
                         return;
                     } else if (signUpData.user) {
-                        // User created but waiting for confirmation
                         throw new Error("Account created! Please check your email to confirm.");
                     }
                 } else {
-                    // Not a gmail address or different error
+                    // Not a gmail address, just show the login error
                     throw signInError;
                 }
             } else {
