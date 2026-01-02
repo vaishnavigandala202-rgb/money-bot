@@ -22,16 +22,48 @@ export default function Login() {
         setLoading(true);
         setError(null);
 
+        const cleanEmail = email.trim();
+
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email,
+            // Attempt to Login first
+            const { data, error: signInError } = await supabase.auth.signInWithPassword({
+                email: cleanEmail,
                 password,
             });
 
-            if (error) throw error;
+            if (signInError) {
+                // If login fails (user doesn't exist) and it's a Gmail address, try to auto-signup
+                // This satisfies "any name with @gmail.com should be valid whether the email exist or not"
+                if (cleanEmail.toLowerCase().endsWith('@gmail.com') && signInError.message.includes("Invalid login credentials")) {
+                    console.log("Auto-signup for Gmail user...");
+                    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+                        email: cleanEmail,
+                        password,
+                    });
 
-            // Redirect is handled by App.jsx auth state listener, but we can double check
-            navigate('/');
+                    if (signUpError) {
+                        // If signup also fails, throw original login error to avoid confusing the user
+                        // unless it's a different error
+                        console.error("Auto-signup failed:", signUpError);
+                        throw signInError;
+                    }
+
+                    if (signUpData.session) {
+                        // Success! Session created immediately (Email Confirmation Disabled)
+                        navigate('/');
+                        return;
+                    } else if (signUpData.user) {
+                        // User created but waiting for confirmation
+                        throw new Error("Account created! Please check your email to confirm.");
+                    }
+                } else {
+                    // Not a gmail address or different error
+                    throw signInError;
+                }
+            } else {
+                // Login successful
+                navigate('/');
+            }
 
         } catch (err) {
             setError(err.message);
