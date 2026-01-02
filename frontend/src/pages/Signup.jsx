@@ -17,9 +17,11 @@ export default function Signup() {
         setLoading(true);
         setError(null);
 
+        const cleanEmail = email.trim();
+
         try {
-            const { data, error } = await supabase.auth.signUp({
-                email,
+            const { data, error: signUpError } = await supabase.auth.signUp({
+                email: cleanEmail,
                 password,
                 options: {
                     data: {
@@ -28,11 +30,38 @@ export default function Signup() {
                 },
             });
 
-            if (error) throw error;
+            if (signUpError) {
+                // If user already exists, try to log in automatically to satisfy "frictionless" request
+                if (signUpError.message.includes("already registered") || signUpError.message.includes("already exists")) {
+                    console.log("User exists, attempting auto-login...");
+                    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+                        email: cleanEmail,
+                        password,
+                    });
+
+                    if (signInError) {
+                        // Keep the original specific error (e.g. Invalid login credentials) if auto-login fails
+                        if (signInError.message.includes("Invalid login credentials")) {
+                            throw new Error("Account exists, but password was incorrect.");
+                        }
+                        throw signInError;
+                    }
+
+                    // Auto-login success
+                    navigate('/');
+                    return;
+                }
+
+                throw signUpError;
+            }
 
             if (data) {
-                alert('Registration successful! Please check your email for verification if enabled, or log in.');
-                navigate('/login');
+                if (data.session) {
+                    navigate('/');
+                } else if (data.user) {
+                    alert('Registration successful! Please check your email for verification if enabled, or log in.');
+                    navigate('/login');
+                }
             }
         } catch (err) {
             setError(err.message);
