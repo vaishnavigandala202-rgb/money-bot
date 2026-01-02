@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Lock, LogIn, ShieldCheck } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase, isConfigured } from '../lib/supabaseClient';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function Login() {
@@ -13,6 +13,12 @@ export default function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!isConfigured) {
+            setError("Cannot sign in: Application is not configured. Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY.");
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -23,10 +29,6 @@ export default function Login() {
             });
 
             if (error) throw error;
-
-            // onLogin callback is no longer needed as App.jsx listens to auth state
-            // But if we want to be explicit or if onLogin is passed for legacy support:
-            // if (onLogin) onLogin(); 
 
             // Redirect is handled by App.jsx auth state listener, but we can double check
             navigate('/');
@@ -57,6 +59,13 @@ export default function Login() {
                         <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Welcome Back</h1>
                         <p className="text-slate-500 font-medium">Please enter your details to sign in</p>
                     </div>
+
+                    {!isConfigured && (
+                        <div className="mb-6 p-4 rounded-xl bg-orange-50 border border-orange-100 text-orange-800 text-sm">
+                            <p className="font-bold mb-1">Configuration Error</p>
+                            <p>Supabase connection keys are missing. Please add <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> to your Vercel Environment Variables.</p>
+                        </div>
+                    )}
 
                     {error && (
                         <div className="mb-4 p-3 rounded-lg bg-red-50 text-red-600 text-sm font-medium">
