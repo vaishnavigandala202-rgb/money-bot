@@ -94,7 +94,7 @@ export default function Login() {
                         <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 shadow-xl shadow-blue-200">
                             <ShieldCheck size={32} />
                         </div>
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Welcome Back</h1>
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Welcome Back (Debug)</h1>
                         <p className="text-slate-500 font-medium">Please enter your details to sign in</p>
                     </div>
 
@@ -107,7 +107,7 @@ export default function Login() {
 
                     {error && (
                         <div className="mb-4 p-3 rounded-lg bg-red-50 text-red-600 text-sm font-medium">
-                            {error}
+                            Supabase says: {error}
                         </div>
                     )}
 
@@ -124,7 +124,7 @@ export default function Login() {
                                     placeholder="name@company.com"
                                     className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm font-medium"
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    onChange={(e) => setEmail(e.target.value.replace(/[^a-zA-Z0-9@._-]/g, ""))}
                                 />
                             </div>
                         </div>
@@ -170,9 +170,20 @@ export default function Login() {
                         <p className="text-sm text-slate-500 font-medium">
                             Don't have an account? <Link to="/signup" className="text-blue-600 font-bold hover:underline">Sign up for free</Link>
                         </p>
+
+                        <div className="mt-8 p-4 bg-slate-100 rounded text-xs text-left overflow-auto font-mono text-slate-500">
+                            <p className="font-bold">DEBUG INFO:</p>
+                            <p>Configured: {isConfigured ? 'YES' : 'NO'}</p>
+                            <p>Input Email: "{email}"</p>
+                        </div>
                     </div>
                 </div>
             </motion.div>
         </div>
+    );
+}
+                </div >
+            </motion.div >
+        </div >
     );
 }
