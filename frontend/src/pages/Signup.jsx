@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Lock, UserPlus, ShieldCheck, User } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase, isConfigured } from '../lib/supabaseClient';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function Signup() {
@@ -14,6 +14,12 @@ export default function Signup() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!isConfigured) {
+            setError("App not configured.");
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -70,6 +76,8 @@ export default function Signup() {
         }
     };
 
+    const debugUrl = import.meta.env.VITE_SUPABASE_URL || "undefined";
+
     return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 relative overflow-hidden">
             {/* Background Orbs */}
@@ -86,9 +94,16 @@ export default function Signup() {
                         <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 shadow-xl shadow-blue-200">
                             <ShieldCheck size={32} />
                         </div>
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Create Account (v2)</h1>
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Create Account (Debug)</h1>
                         <p className="text-slate-500 font-medium">Join MoneyBot today</p>
                     </div>
+
+                    {!isConfigured && (
+                        <div className="mb-6 p-4 rounded-xl bg-orange-50 border border-orange-100 text-orange-800 text-sm">
+                            <p className="font-bold mb-1">Configuration Error</p>
+                            <p>Supabase keys missing in Vercel.</p>
+                        </div>
+                    )}
 
                     {error && (
                         <div className="mb-4 p-3 rounded-lg bg-red-50 text-red-600 text-sm font-medium">
@@ -164,6 +179,12 @@ export default function Signup() {
                         <p className="text-sm text-slate-500 font-medium">
                             Already have an account? <Link to="/login" className="text-blue-600 font-bold hover:underline">Sign in</Link>
                         </p>
+
+                        <div className="mt-8 p-4 bg-slate-100 rounded text-xs text-left overflow-auto font-mono text-slate-500">
+                            <p className="font-bold">DEBUG INFO:</p>
+                            <p>Configured: {isConfigured ? 'YES' : 'NO'}</p>
+                            <p>URL: {debugUrl.substring(0, 15)}...</p>
+                        </div>
                     </div>
                 </div>
             </motion.div>
