@@ -86,13 +86,13 @@ export default function Signup() {
                         <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 shadow-xl shadow-blue-200">
                             <ShieldCheck size={32} />
                         </div>
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Create Account</h1>
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Create Account (v2)</h1>
                         <p className="text-slate-500 font-medium">Join MoneyBot today</p>
                     </div>
 
                     {error && (
                         <div className="mb-4 p-3 rounded-lg bg-red-50 text-red-600 text-sm font-medium">
-                            {error}
+                            Supabase says: {error}
                         </div>
                     )}
 
