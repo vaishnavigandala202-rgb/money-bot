@@ -126,7 +126,7 @@ export default function Signup() {
                                     placeholder="name@company.com"
                                     className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm font-medium"
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value.trim())}
+                                    onChange={(e) => setEmail(e.target.value.replace(/[^a-zA-Z0-9@._-]/g, ""))}
                                 />
                             </div>
                         </div>
