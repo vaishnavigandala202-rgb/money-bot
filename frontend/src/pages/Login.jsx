@@ -182,8 +182,4 @@ export default function Login() {
         </div>
     );
 }
-                </div >
-            </motion.div >
-        </div >
-    );
-}
+
