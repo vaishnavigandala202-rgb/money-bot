@@ -94,7 +94,7 @@ export default function Signup() {
                         <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 shadow-xl shadow-blue-200">
                             <ShieldCheck size={32} />
                         </div>
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Create Account (Debug)</h1>
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Create Account (Debug v2)</h1>
                         <p className="text-slate-500 font-medium">Join MoneyBot today</p>
                     </div>
 
@@ -141,7 +141,7 @@ export default function Signup() {
                                     placeholder="name@company.com"
                                     className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm font-medium"
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value.replace(/[^a-zA-Z0-9@._-]/g, ""))}
+                                    onChange={(e) => setEmail(e.target.value)}
                                 />
                             </div>
                         </div>
@@ -184,6 +184,7 @@ export default function Signup() {
                             <p className="font-bold">DEBUG INFO:</p>
                             <p>Configured: {isConfigured ? 'YES' : 'NO'}</p>
                             <p>URL: {debugUrl.substring(0, 15)}...</p>
+                            <p>Input Email: "{email}"</p>
                         </div>
                     </div>
                 </div>
